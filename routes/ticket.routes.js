@@ -5,7 +5,7 @@ let router = require("express").Router();
 // Ticket Routes for CRUD operations on Tickets
 router.post("/create", verifyToken, ticket.create);
 router.get("/getAll", verifyToken, ticket.findAll);
-router.get("/getAll/:id", verifyToken, ticket.findOne);
+router.get("/getOne/:id", verifyToken, ticket.findOne);
 router.put("/update/:id", verifyToken, ticket.update);
 router.delete("/deleteAll", verifyToken, ticket.deleteAll);
 router.delete("/delete/:id", verifyToken, ticket.delete);

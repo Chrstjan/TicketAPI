@@ -20,7 +20,7 @@ const db = require("./models");
 
 // Initialize Sequelize to fill DB with tables from models (Turn of force: true to not reset DB)
 db.sequelize
-  .sync({ force: true })
+  .sync({ force: false })
   .then(() => {
     console.log("Synced db.");
   })
