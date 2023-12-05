@@ -2,10 +2,12 @@
 const { v4: uuidv4 } = require("uuid");
 const db = require("../models");
 
+// Function to verify expiration on token
 exports.verifyExpiration = (token) => {
   return token.expiryDate.getTime() < new Date().getTime();
 };
 
+// Function to create a new JWT and refresh
 exports.createToken = async function (user) {
   let expiredAt = new Date();
   expiredAt.setSeconds(

@@ -2,7 +2,9 @@ const db = require("../models/index");
 const User = db.User;
 const Ticket = db.Ticket;
 
+// Fetch user data function
 exports.fetchUserData = async (req, res) => {
+  // find user by id
   const user = await User.findOne({
     where: { id: req.user.id },
     attributes: {
@@ -10,13 +12,4 @@ exports.fetchUserData = async (req, res) => {
     },
   });
   return res.send(user);
-};
-
-exports.fetchUserTickets = async (req, res) => {
-  const tickets = await Ticket.findAll({
-    where: {
-      user: req.user.token,
-    },
-  });
-  return res.send(tickets);
 };

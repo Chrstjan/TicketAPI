@@ -1,44 +1,51 @@
 const db = require("../models");
+const jwt = require("jsonwebtoken");
 const ticket = db.Ticket;
-const Op = db.Sequelize.Op;
 
+// Function to Create Ticket
 exports.create = (req, res) => {
-  /*  if (!req.body.name) {
-    res.status(400).send({
-      message: "Name can not be empty",
-    });
-  } */
+  // Get decoded user id from token
+  let authorization = req.headers.authorization.split(" ")[1];
+  let decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+  console.log(decoded.id);
 
-  if (req.body.token) {
-    const Ticket = {
-      name: req.body.name,
-      date: req.body.type,
-      description: req.body.description,
-      published: req.body.published,
-      user: req.body.token,
-    };
+  // Create new ticket object
+  const Ticket = {
+    name: req.body.name,
+    date: req.body.type,
+    description: req.body.description,
+    published: req.body.published,
+    user: decoded.id,
+  };
 
-    ticket
-      .create(Ticket)
-      .then((data) => res.send(data))
-      .catch((err) =>
-        res.status(500).send({
-          message:
-            err.message || "An unknown error occured while creating a ticket",
-        })
-      );
-  } else {
-    res.status(500).send({
-      message: "You need to be signed in first",
-    });
-  }
-};
-exports.findAll = (req, res) => {
-  const title = req.query.title;
-  var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
-
+  // Insert ticket into DB and return data to user, excluding user ID
   ticket
-    .findAll({ where: condition })
+    .create(Ticket)
+    .then((data) => {
+      delete data["user"], res.send(data);
+    })
+    .catch((err) =>
+      res.status(500).send({
+        message:
+          err.message || "An unknown error occured while creating a ticket",
+      })
+    );
+};
+
+// Function to find all tickets belonging to user
+exports.findAll = (req, res) => {
+  // get user ID from decoded token
+  let authorization = req.headers.authorization.split(" ")[1];
+  let decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+
+  // find all tickets belonging to user and returns them back
+  ticket
+    .findAll({
+      where: { user: decoded.id },
+      attributes: {
+        exclude: ["user"],
+      },
+    })
     .then((data) => {
       res.send(data);
     })
@@ -49,11 +56,23 @@ exports.findAll = (req, res) => {
     });
 };
 
+// Function to find one ticket belonging to user, with ticket ID
 exports.findOne = (req, res) => {
+  // get the ID from request
   const id = req.params.id;
 
+  // get decoded user id
+  let authorization = req.headers.authorization.split(" ")[1];
+  let decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+
+  // find ticket by id and user ID
   ticket
-    .findByPk(id)
+    .findByPk({
+      where: { id: id, user: decoded.id },
+      attributes: {
+        exclude: ["user"],
+      },
+    })
     .then((data) => {
       if (data) {
         res.send(data);
@@ -69,12 +88,23 @@ exports.findOne = (req, res) => {
       });
     });
 };
+
+// Function to update user tickets
 exports.update = (req, res) => {
+  // get id of ticket to update
   const id = req.params.id;
 
+  // get decoded user id
+  let authorization = req.headers.authorization.split(" ")[1];
+  let decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+
+  // update ticket with specified id belonging to user ID
   ticket
     .update(req.body, {
-      where: { id: id },
+      where: { id: id, user: decoded.id },
+      attributes: {
+        exclude: ["user"],
+      },
     })
     .then((num) => {
       if (num == 1) {
@@ -94,12 +124,22 @@ exports.update = (req, res) => {
     });
 };
 
+// Function to delete a ticket
 exports.delete = (req, res) => {
+  // get id of ticket to delete
   const id = req.params.id;
 
+  // get user id from decoded token
+  let authorization = req.headers.authorization.split(" ")[1];
+  let decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+
+  // delete ticket belonging to user ID and with specified ticket ID
   ticket
     .destroy({
-      where: { id: id },
+      where: { id: id, user: decoded.id },
+      attributes: {
+        exclude: ["user"],
+      },
     })
     .then((num) => {
       if (num == 1) {
@@ -119,10 +159,16 @@ exports.delete = (req, res) => {
     });
 };
 
+// Function to delete all tickets
 exports.deleteAll = (req, res) => {
+  // get user id from decoded token
+  let authorization = req.headers.authorization.split(" ")[1];
+  let decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+
+  // delete all tokens belonging to user
   ticket
     .destroy({
-      where: {},
+      where: { user: decoded.id },
       truncate: false,
     })
     .then((nums) => {
@@ -132,19 +178,6 @@ exports.deleteAll = (req, res) => {
       res.status(500).send({
         message:
           err.message || "Some error occurred while removing all tickets.",
-      });
-    });
-};
-
-exports.findAllPublished = (req, res) => {
-  ticket
-    .findAll({ where: { published: true } })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving tickets.",
       });
     });
 };

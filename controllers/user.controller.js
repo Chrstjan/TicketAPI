@@ -8,10 +8,11 @@ const {
   verifyExpiration,
 } = require("../controllers/authToken.controller");
 
+// Register user function
 exports.registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    // Check if the email exists
+    // Check if user exists by email
     const userExists = await user.findOne({
       where: { email },
     });
@@ -21,6 +22,7 @@ exports.registerUser = async (req, res) => {
         .send("Email is already associated with an account");
     }
 
+    // Create new user and hash password
     await user.create({
       name,
       email,
@@ -32,9 +34,11 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+// Sign in function
 exports.signInUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    // Find user by email
     const USER = await user.findOne({
       where: { email },
     });
@@ -54,6 +58,7 @@ exports.signInUser = async (req, res) => {
     });
     let refreshToken = await createToken(USER);
 
+    // Send user back with name, email and tokens
     res.status(200).send({
       id: USER.id,
       name: USER.name,
@@ -66,6 +71,7 @@ exports.signInUser = async (req, res) => {
   }
 };
 
+// Refresh Token function
 exports.refreshToken = async (req, res) => {
   const { refreshToken: requestToken } = req.body;
   if (requestToken == null) {

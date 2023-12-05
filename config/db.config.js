@@ -1,3 +1,4 @@
+// Config file - change this to fit your DB
 module.exports = {
   HOST: "localhost",
   USER: "root",
