@@ -11,8 +11,10 @@ exports.create = (req, res) => {
 
   // Create new ticket object
   const Ticket = {
-    name: req.body.name,
+    title: req.body.title,
     date: req.body.date,
+    location: req.body.location,
+    time: req.body.time,
     description: req.body.description,
     published: req.body.published,
     user: decoded.id,

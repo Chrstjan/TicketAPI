@@ -15,6 +15,9 @@ module.exports = (sequalize, Sequelize) => {
     password: {
       type: Sequelize.STRING,
     },
+    phone: {
+      type: Sequelize.INTEGER,
+    },
     active: {
       type: Sequelize.BOOLEAN,
     },

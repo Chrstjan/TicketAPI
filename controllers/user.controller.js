@@ -11,7 +11,7 @@ const {
 // Register user function
 exports.registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
     // Check if user exists by email
     const userExists = await user.findOne({
       where: { email },
@@ -26,11 +26,12 @@ exports.registerUser = async (req, res) => {
     await user.create({
       name,
       email,
+      phone,
       password: await bcrypt.hash(password, 15),
     });
     return res.status(200).send("Registration successful");
   } catch (err) {
-    return res.status(500).send("Error in registering user");
+    return res.status(500).send("Error in registering user" + err);
   }
 };
 
@@ -63,6 +64,7 @@ exports.signInUser = async (req, res) => {
       id: USER.id,
       name: USER.name,
       email: USER.email,
+      phone: USER.phone,
       accessToken: token,
       refreshToken,
     });
