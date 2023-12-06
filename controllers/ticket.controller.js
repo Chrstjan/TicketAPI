@@ -69,24 +69,19 @@ exports.findOne = (req, res) => {
 
   // find ticket by id and user ID
   ticket
-    .findByPk({
-      where: { id: id, user: decoded.id },
-      attributes: {
-        exclude: ["user"],
-      },
-    })
+    .findByPk(id)
     .then((data) => {
-      if (data) {
+      if (data && data.user === decoded.id) {
         res.send(data);
       } else {
         res.status(404).send({
-          message: `Cannot find ticket with id=${id}.`,
+          message: `Cannot find ticket with id=${id} or this ID does not belong to user`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving ticket with id=" + id,
+        message: "Error retrieving ticket with id=" + id + err,
       });
     });
 };
