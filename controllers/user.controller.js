@@ -19,7 +19,7 @@ exports.registerUser = async (req, res) => {
     if (userExists) {
       return res
         .status(400)
-        .send("Email is already associated with an account");
+        .send({ message: "Email is already associated with an account" });
     }
 
     // Create new user and hash password
@@ -29,9 +29,9 @@ exports.registerUser = async (req, res) => {
       phone,
       password: await bcrypt.hash(password, 15),
     });
-    return res.status(200).send("Registration successful");
+    return res.status(200).send({ message: "Registration successful" });
   } catch (err) {
-    return res.status(500).send("Error in registering user" + err);
+    return res.status(500).send({ message: "Error in registering user" + err });
   }
 };
 
@@ -44,13 +44,15 @@ exports.signInUser = async (req, res) => {
       where: { email },
     });
     if (!USER) {
-      return res.status(404).json("Email not found");
+      return res.status(404).json({ message: "Email not found" });
     }
 
     // Verify password
     const passwordValid = await bcrypt.compare(password, USER.password);
     if (!passwordValid) {
-      return res.status(404).json("Incorrect email and password combination");
+      return res
+        .status(404)
+        .json({ message: "Incorrect email and password combination" });
     }
 
     // Authenticate user with jwt
@@ -69,7 +71,7 @@ exports.signInUser = async (req, res) => {
       refreshToken,
     });
   } catch (err) {
-    return res.status(500).send("Sign in error: " + err);
+    return res.status(500).send({ message: "Sign in error: " + err });
   }
 };
 
@@ -77,7 +79,7 @@ exports.signInUser = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   const { refreshToken: requestToken } = req.body;
   if (requestToken == null) {
-    return res.status(403).send("Refresh Token is required!");
+    return res.status(403).send({ message: "Refresh Token is required!" });
   }
 
   try {
@@ -85,14 +87,17 @@ exports.refreshToken = async (req, res) => {
       where: { token: requestToken },
     });
     if (!refreshToken) {
-      res.status(403).send("Invalid refresh token");
+      res.status(403).send({ message: "Invalid refresh token" });
       return;
     }
     if (verifyExpiration(refreshToken)) {
       auth.destroy({ where: { id: refreshToken.id } });
       res
         .status(403)
-        .send("Refresh token was expired. Please make a new sign in request");
+        .send({
+          message:
+            "Refresh token was expired. Please make a new sign in request",
+        });
       return;
     }
 
@@ -112,6 +117,6 @@ exports.refreshToken = async (req, res) => {
     });
   } catch (err) {
     console.log("err", err);
-    return res.status(500).send("Internal server error");
+    return res.status(500).send({ message: "Internal server error" });
   }
 };

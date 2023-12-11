@@ -7,7 +7,9 @@ const app = express();
 
 // Set origin for CORS
 const corsOptions = {
-  origin: "http://localhost:8081",
+  origin: "*",
+  credentials: true, //access-control-allow-credentials:true
+  optionSuccessStatus: 200,
 };
 
 // Set up app to use cors, json and urlEncoded body
