@@ -18,6 +18,7 @@ exports.create = (req, res) => {
     description: req.body.description,
     published: req.body.published,
     user: decoded.id,
+    image: req.body.image,
   };
 
   // Insert ticket into DB and return data to user, excluding user ID

@@ -16,7 +16,7 @@ module.exports = (sequalize, Sequelize) => {
       type: Sequelize.STRING,
     },
     description: {
-      type: Sequelize.STRING,
+      type: Sequelize.TEXT,
     },
     published: {
       type: Sequelize.BOOLEAN,
