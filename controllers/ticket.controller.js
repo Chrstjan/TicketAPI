@@ -16,7 +16,7 @@ exports.create = (req, res) => {
     location: req.body.location,
     time: req.body.time,
     description: req.body.description,
-    published: req.body.published,
+    published: new Date().toLocaleTimeString("da-DK"),
     user: decoded.id,
     image: req.body.image,
   };
@@ -91,35 +91,55 @@ exports.findOne = (req, res) => {
 exports.update = (req, res) => {
   // get id of ticket to update
   const id = req.params.id;
+  // find ticket by id and user ID
+  ticket.findByPk(id).then((data) => {
+    if (data && data.user === decoded.id) {
+      ticket
+        .update(
+          {
+            title: req.body.title ? req.body.title : data.title,
+            date: req.body.date ? req.body.date : data.date,
+            location: req.body.location ? req.body.location : data.location,
+            time: req.body.time ? req.body.time : data.time,
+            image: req.body.image ? req.body.image : data.image,
+            description: req.body.description
+              ? req.body.description
+              : data.description,
+            published: data.published,
+            createdAt: data.createdAt,
+            updatedAt: new Date().toLocaleDateString("da-DK"),
+          },
+          {
+            where: { id: id, user: decoded.id },
+            attributes: {
+              exclude: ["user"],
+            },
+          }
+        )
+        .then((num) => {
+          if (num == 1) {
+            res.send({
+              message: "ticket was updated successfully.",
+            });
+          } else {
+            res.send({
+              message: `Cannot update ticket with id=${id}!`,
+            });
+          }
+        })
+        .catch((err) => {
+          res.status(500).send({
+            message: `Error updating ticket with id=${id} ErrorMessage: ${err}}`,
+          });
+        });
+    }
+  });
 
   // get decoded user id
   let authorization = req.headers.authorization.split(" ")[1];
   let decoded = jwt.verify(authorization, process.env.JWT_SECRET);
 
   // update ticket with specified id belonging to user ID
-  ticket
-    .update(req.body, {
-      where: { id: id, user: decoded.id },
-      attributes: {
-        exclude: ["user"],
-      },
-    })
-    .then((num) => {
-      if (num == 1) {
-        res.send({
-          message: "ticket was updated successfully.",
-        });
-      } else {
-        res.send({
-          message: `Cannot update ticket with id=${id}!`,
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error updating ticket with id=" + id,
-      });
-    });
 };
 
 // Function to delete a ticket
