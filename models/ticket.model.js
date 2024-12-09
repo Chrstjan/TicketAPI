@@ -19,7 +19,7 @@ module.exports = (sequalize, Sequelize) => {
       type: Sequelize.TEXT,
     },
     published: {
-      type: Sequelize.BOOLEAN,
+      type: Sequelize.STRING,
     },
     user: {
       type: Sequelize.INTEGER,

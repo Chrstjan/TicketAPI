@@ -16,7 +16,7 @@ exports.create = (req, res) => {
     location: req.body.location,
     time: req.body.time,
     description: req.body.description,
-    published: new Date().toLocaleTimeString("da-DK"),
+    published: new Date().toLocaleDateString("da-DK"),
     user: decoded.id,
     image: req.body.image,
   };
